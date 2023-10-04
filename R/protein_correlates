@@ -1,0 +1,57 @@
+# Load necessary libraries
+library(readxl)     # For reading Excel files
+library(reshape2)   # For data reshaping
+library(ggplot2)    # For data visualization
+
+# Set the working directory to the location of your data
+setwd("~/Desktop/input_folder/")
+
+# Read the proteomics data from an Excel file (modify the filename as needed)
+full_data <- read_excel("input.xlsx")
+
+# Remove the first column (assuming it contains row names or IDs)
+data <- full_data[, -1]
+
+# Remove duplicated column names (if any)
+cleaned_data <- data[, !duplicated(names(data))]
+
+# Compute the correlation matrix for the proteomics data
+corr_matrix <- cor(data)
+
+# Get correlations for the first variable (you may change this if needed, make the desired GN/protein the first row)
+first_var_corr <- corr_matrix[, 1]
+
+# Sort correlations in descending order
+sorted_corr <- sort(first_var_corr, decreasing = TRUE)
+
+# Get names of variables sorted by correlation
+sorted_names <- names(sorted_corr)
+
+# Reorder the correlation matrix by sorted names
+corr_matrix_reordered <- corr_matrix[sorted_names, sorted_names]
+
+# Define the number of top correlated variables to keep
+top_corr_count <- 20
+
+# Get the indices of the top correlated variables
+top_corr_indices <- head(seq_along(sorted_names), top_corr_count)
+
+# Extract the top correlated sub-matrix
+corr_matrix_top <- corr_matrix_reordered[top_corr_indices, top_corr_indices]
+
+# Set diagonal and lower triangle of the correlation matrix to NA
+corr_matrix_top[lower.tri(corr_matrix_top, diag = TRUE)] <- NA
+
+# Invert the order of rows and columns for better visualization
+reversed_corr_matrix_top <- corr_matrix_top[nrow(corr_matrix_top):1, ncol(corr_matrix_top):1]
+
+# Create a heatmap to visualize the correlation matrix
+Plot <- ggplot(data = reshape2::melt(reversed_corr_matrix_top, na.rm = TRUE)) +
+  geom_tile(aes(x = Var1, y = Var2, fill = value)) +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = -90, vjust = 0.5, hjust = 0)) +
+  labs(title = "Protein-X Correlated Proteins in dataset")
+
+# Display the correlation matrix heatmap
+print(Plot)
