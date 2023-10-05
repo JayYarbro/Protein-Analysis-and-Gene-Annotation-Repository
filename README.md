@@ -1,4 +1,4 @@
-#Protein Analysis and Gene Annotation Repository
+Protein Analysis and Gene Annotation Repository
 
 Introduction
 
