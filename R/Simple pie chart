@@ -1,0 +1,19 @@
+# Function to create a customizable pie chart
+create_custom_pie_chart <- function(wedges) {
+  # Check if the sum of percentages is 100%
+  if (sum(wedges) != 100) {
+    stop("The sum of wedge percentages must be 100%.")
+  }
+  
+  # Create labels for the wedges
+  labels <- paste0("Wedge ", 1:length(wedges))
+  
+  # Create the pie chart
+  pie(wedges, labels = labels, main = "Custom Pie Chart")
+}
+
+# Specify the percentage occupancy for each wedge
+wedge_percentages <- c(20, 10, 30, 40)  # You can customize this list
+
+# Create the pie chart using the specified percentages
+create_custom_pie_chart(wedge_percentages)
