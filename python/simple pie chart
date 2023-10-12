@@ -1,0 +1,16 @@
+import matplotlib.pyplot as plt
+
+def create_custom_pie_chart():
+    wedge_percentages = [0.1, 16.2, 83.7]
+    wedge_labels = [">100, 0.1%", "<0.5, 16.2%", "0.5 - 100, 83.7%"]
+    
+    # Create the pie chart
+    plt.pie(wedge_percentages, labels=wedge_labels, autopct='%1.1f%%')
+    plt.title("Custom Pie Chart")
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Display the pie chart
+    plt.show()
+
+# Create the pie chart with the specified wedges
+create_custom_pie_chart()
