@@ -1,0 +1,26 @@
+# Install and load the VennDiagram package
+if (!require(VennDiagram)) {
+    install.packages("VennDiagram")
+}
+library(VennDiagram)
+
+# Read data from text files
+# Replace 'path_to_set_A.txt', 'path_to_set_B.txt', 'path_to_set_C.txt' 
+# with the actual file paths
+set_A <- readLines("path_A.txt")
+set_B <- readLines("path_B.txt")
+set_C <- readLines("path_C.txt")
+
+# Generate a list of sets
+input_sets <- list(A = set_A, B = set_B, C = set_C)
+
+# Create the Venn diagram and output to the R plotting window
+venn.plot <- venn.diagram(
+  x = input_sets,
+  category.names = c("Set A", "Set B", "Set C"),
+  filename = NULL,  # Important to set this to NULL for direct plotting
+  output = TRUE
+)
+
+# Display the Venn diagram
+grid.draw(venn.plot)
