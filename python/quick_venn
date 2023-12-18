@@ -1,0 +1,24 @@
+#pip install matplotlib matplotlib-venn
+# Import required libraries
+import matplotlib.pyplot as plt
+from matplotlib_venn import venn3
+import pandas as pd
+
+# Read data from text files
+# Replace 'path_to_set_A.txt', 'path_to_set_B.txt', 'path_to_set_C.txt'
+# with the actual file paths
+set_A = pd.read_csv("path_A.txt", header=None)[0].tolist()
+set_B = pd.read_csv("path_B.txt", header=None)[0].tolist()
+set_C = pd.read_csv("path_C.txt", header=None)[0].tolist()
+
+# Convert sets to Python sets for Venn diagram
+set_A = set(set_A)
+set_B = set(set_B)
+set_C = set(set_C)
+
+# Create the Venn diagram
+plt.figure()
+venn_plot = venn3([set_A, set_B, set_C], ('Set A', 'Set B', 'Set C'))
+
+# Display the Venn diagram
+plt.show()
