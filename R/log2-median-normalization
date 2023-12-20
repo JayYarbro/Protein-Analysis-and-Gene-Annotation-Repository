@@ -1,0 +1,48 @@
+# Load packages using pacman
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(readxl, openxlsx, data.table, dplyr, tidyr, ggplot2)
+
+#Load your data
+setwd("~/your_data_folder_path")
+data <- read_excel("your_file.xlsx")
+
+# Keep only numeric columns
+data <- data %>% select_if(is.numeric)
+
+# Assuming `data` is your dataframe
+# Function to apply log2 conversion to numeric columns
+log2_transform <- function(column) {
+  if (is.numeric(column)) {
+    # Apply log2 transformation, adding 1 to avoid log(0)
+    return(log2(column + 1))
+  } else {
+    # Return non-numeric columns as they are
+    return(column)
+  }
+}
+
+# Apply log2 transformation to each numeric column
+data <- data.frame(lapply(data, log2_transform))
+
+# Calculate the global median, considering only numeric columns
+numeric_columns <- sapply(data, is.numeric)
+global_median <- median(unlist(data[, numeric_columns]), na.rm = TRUE)
+
+# Function to normalize a column
+normalize_column <- function(column) {
+  if (is.numeric(column)) {
+    column_median <- median(column, na.rm = TRUE)
+    # Shift each value in the column
+    normalized_column <- column - column_median + global_median
+    return(normalized_column)
+  } else {
+    # Return non-numeric columns as they are
+    return(column)
+  }
+}
+
+# Apply the normalization to each column
+normalized_data <- data.frame(lapply(data, normalize_column))
+
+# View the normalized data
+print(normalized_data)
