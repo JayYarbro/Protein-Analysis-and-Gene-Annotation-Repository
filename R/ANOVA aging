@@ -1,0 +1,65 @@
+# Load necessary libraries
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(dplyr, tidyr, stats, qvalue)
+
+# Assume your dataframe is named `df`
+# The first row is Age, the first column is Gene names
+
+
+
+# Example structure:
+# input <- read.csv("your_file.csv", header = TRUE)
+
+# You may want to remove other metadata columns (Accession, PSM, etc.). Can use the following to do so: 
+#df <- df[, -c(2:n)]
+#This will delete columns 2 through n. 
+
+
+# Separate the Age row and gene names
+ages <- as.numeric(unlist(df[1, -1]))  # First row without the first column
+gene_names <- df[-1, 1]  # Gene names (excluding the first row)
+
+# Create a dataframe excluding the first row and column
+expression_data <- df[-1, -1]
+expression_data <- as.data.frame(lapply(expression_data, as.numeric))  # Convert to numeric
+
+# Function to perform ANOVA and return p-value
+perform_anova <- function(gene_expression) {
+  model <- aov(gene_expression ~ as.factor(ages))
+  anova_summary <- summary(model)
+  p_value <- anova_summary[[1]][["Pr(>F)"]][1]
+  return(p_value)
+}
+
+# Function to calculate log2 fold change
+calculate_log2fc <- function(gene_expression, age1, age2) {
+  expr_age1 <- mean(gene_expression[ages == age1])
+  expr_age2 <- mean(gene_expression[ages == age2])
+  log2fc <- log2(expr_age2 / expr_age1)
+  return(log2fc)
+}
+
+# Apply ANOVA to each gene and collect p-values
+p_values <- apply(expression_data, 1, perform_anova)
+
+# Adjust p-values using False Discovery Rate (FDR)
+fdr_adjusted_p_values <- p.adjust(p_values, method = "fdr")
+
+# Calculate log2FC for 12 months vs 3 months and 18 months vs 3 months
+log2fc_12_vs_3 <- apply(expression_data, 1, calculate_log2fc, age1 = 3, age2 = 12)
+log2fc_18_vs_3 <- apply(expression_data, 1, calculate_log2fc, age1 = 3, age2 = 18)
+
+# Create a result dataframe with Gene names, p-values, FDR adjusted p-values, and log2FC
+results <- data.frame(
+  Gene = gene_names,
+  P_Value = p_values,
+  FDR_Adjusted_P_Value = fdr_adjusted_p_values,
+  Log2FC_12_vs_3 = log2fc_12_vs_3,
+  Log2FC_18_vs_3 = log2fc_18_vs_3
+)
+
+# Display the results with the following:
+#print(results)
+
+# Optionally, save the results to a CSV file
+#write.csv(results, "anova_results_with_fdr.csv", row.names = FALSE)
