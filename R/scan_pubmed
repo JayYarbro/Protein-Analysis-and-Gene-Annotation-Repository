@@ -1,0 +1,27 @@
+#install.packages("rentrez")
+
+# Install and load the necessary package
+if (!requireNamespace("rentrez", quietly = TRUE)) {
+  install.packages("rentrez")
+}
+library(rentrez)
+
+# Function to search PubMed and return the number of hits
+search_pubmed <- function(query) {
+  search_result <- entrez_search(db = "pubmed", term = query, retmax = 0)
+  return(search_result$count)
+}
+
+# Load the CSV file
+input_file <- "input.csv"  # Replace with your input CSV file path
+output_file <- "output.csv"  # Replace with your desired output CSV file path
+
+df <- read.csv(input_file)
+
+# Apply the search_pubmed function to each query and store the results in a new column
+df$Hits <- sapply(df$Query, search_pubmed)
+
+# Save the updated dataframe to a new CSV file
+write.csv(df, output_file, row.names = FALSE)
+
+cat("Results saved to", output_file, "\n")
