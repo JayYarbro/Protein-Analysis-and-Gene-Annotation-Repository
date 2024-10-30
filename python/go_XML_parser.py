@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import csv
 import sys
+import math
 
 # Usage:
 # Run this script from the command line by specifying the input XML file and the desired output CSV file.
@@ -23,7 +24,7 @@ def parse_xml_to_csv(input_file, output_file):
     root = ET.fromstring(content)
 
     # Define CSV header
-    headers = ['label', 'id', 'level', 'number_in_list', 'fold_enrichment', 'fdr'] + [f'mapped_id_{i+1}' for i in range(10)]  # assuming max 10 mapped_ids
+    headers = ['label', 'neg_log10(FDR)', 'id', 'level', 'number_in_list', 'fold_enrichment', 'fdr'] + [f'mapped_id_{i+1}' for i in range(10)]  # assuming max 10 mapped_ids
 
     # Prepare data for CSV
     data_rows = []
@@ -38,12 +39,15 @@ def parse_xml_to_csv(input_file, output_file):
         fold_enrichment = input_list.find('fold_enrichment').text if input_list.find('fold_enrichment') is not None else ''
         fdr = input_list.find('fdr').text if input_list.find('fdr') is not None else ''
         
+        # Calculate -log10(FDR)
+        log_fdr = -math.log10(float(fdr)) if fdr else ''
+        
         mapped_ids = [mapped_id.text for mapped_id in input_list.find('mapped_id_list').findall('mapped_id')]
         
         # Pad mapped_ids to match the header length
-        mapped_ids += [''] * (10 - len(mapped_ids))  # ensure you have a consistent column length for mapped_ids
+        mapped_ids += [''] * (10 - len(mapped_ids))  # ensure we have a consistent column length for mapped_ids
         
-        data_rows.append([label, go_id, level, number_in_list, fold_enrichment, fdr] + mapped_ids)
+        data_rows.append([label, log_fdr, go_id, level, number_in_list, fold_enrichment, fdr] + mapped_ids)
 
     # Write to CSV
     with open(output_file, 'w', newline='') as csvfile:
