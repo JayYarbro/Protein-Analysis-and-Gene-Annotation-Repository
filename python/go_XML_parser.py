@@ -6,25 +6,23 @@ import math
 # Usage:
 # Run this script from the command line by specifying the input XML file and the desired output CSV file.
 # Example:
-#   python go_XML_parser.py input_file.xml output_file.csv
+#   python generate_csv_from_xml.py input_file.xml output_file.csv
 # This will parse the XML file, extract specified fields, and output them to a CSV file.
 
 def parse_xml_to_csv(input_file, output_file):
-    # Read the file in binary mode to handle encoding
-    with open(input_file, 'rb') as file:
-        content = file.read()
-    
-    # Try decoding with UTF-16, fall back to UTF-8 if needed
+    # Try opening as UTF-8, then fall back to UTF-16 if needed
     try:
-        content = content.decode('utf-16')
+        with open(input_file, 'r', encoding='utf-8') as file:
+            content = file.read()
     except UnicodeDecodeError:
-        content = content.decode('utf-8')
+        with open(input_file, 'r', encoding='utf-16') as file:
+            content = file.read()
 
     # Parse the XML content
     root = ET.fromstring(content)
 
     # Define CSV header
-    headers = ['label', 'neg_log10(FDR)', 'id', 'level', 'number_in_list', 'fold_enrichment', 'fdr'] + [f'mapped_id_{i+1}' for i in range(10)]  # assuming max 10 mapped_ids
+    headers = ['label', '-log10(FDR)', 'id', 'level', 'number_in_list', 'fold_enrichment', 'fdr'] + [f'mapped_id_{i+1}' for i in range(10)]  # assuming max 10 mapped_ids
 
     # Prepare data for CSV
     data_rows = []
